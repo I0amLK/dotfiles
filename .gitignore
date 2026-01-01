@@ -1,0 +1,18 @@
+# OS / editor
+.DS_Store
+*.swp
+*.tmp
+
+# secrets / tokens / keys
+*.key
+*.pem
+*.p12
+*.env
+.env*
+secrets*
+*token*
+*apikey*
+*password*
+
+# SSH (不上传私钥)
+.ssh/
