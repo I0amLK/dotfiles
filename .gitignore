@@ -16,3 +16,6 @@ secrets*
 
 # SSH (不上传私钥)
 .ssh/
+
+.DS_Store
+**/.DS_Store

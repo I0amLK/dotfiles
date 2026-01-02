@@ -1,0 +1,169 @@
+local M = {}
+
+local MATH_NODES = {
+  displayed_equation = true,
+  inline_formula = true,
+  math_environment = true,
+}
+local TEXT_NODES = {
+  text_mode = true,
+}
+
+local function node_at_cursor()
+  local ok, node = pcall(vim.treesitter.get_node, { ignore_injections = false })
+  if ok then
+    return node
+  end
+  return nil
+end
+
+local function vimtex_in_mathzone()
+  if vim.fn.exists("*vimtex#syntax#in_mathzone") == 1 then
+    local ok, res = pcall(vim.fn["vimtex#syntax#in_mathzone"])
+    if ok then
+      return res == 1
+    end
+  end
+  return nil
+end
+
+local function vimtex_env_is_inside(env)
+  if vim.fn.exists("*vimtex#env#is_inside") == 1 then
+    local ok, pos = pcall(vim.fn["vimtex#env#is_inside"], env)
+    if ok and type(pos) == "table" then
+      return (pos[1] ~= 0) or (pos[2] ~= 0)
+    end
+  end
+  return false
+end
+
+M.in_env_md = function(env)
+  local node = node_at_cursor()
+  local bufnr = vim.api.nvim_get_current_buf()
+  while node do
+    if node:type() == "generic_environment" then
+      local begin = node:child(0)
+      if begin then
+        local name = begin:field("name")
+        if name and name[1] then
+          local text = vim.treesitter.get_node_text(name[1], bufnr)
+          if text == "{" .. env .. "}" then
+            return true
+          end
+        end
+      end
+    end
+    node = node:parent()
+  end
+  return false
+end
+
+M.in_env = function(env)
+  return vimtex_env_is_inside(env)
+end
+
+M.in_mathzone_md = function()
+  local node = node_at_cursor()
+  while node do
+    if TEXT_NODES[node:type()] then
+      return false
+    end
+    if MATH_NODES[node:type()] then
+      return true
+    end
+    node = node:parent()
+  end
+  return false
+end
+
+M.in_text_md = function()
+  return not M.in_mathzone_md()
+end
+
+M.in_mathzone_typ = function()
+  local node = node_at_cursor()
+  while node do
+    if node:type() == "math" then
+      return true
+    end
+    node = node:parent()
+  end
+  return false
+end
+
+M.in_mathzone = function()
+  local ft = vim.bo.filetype
+  if ft == "tex" or ft == "plaintex" or ft == "latex" then
+    local vimtex = vimtex_in_mathzone()
+    if type(vimtex) == "boolean" then
+      return vimtex
+    end
+    return M.in_mathzone_md()
+  elseif ft == "markdown" then
+    return M.in_mathzone_md()
+  elseif ft == "typst" then
+    return M.in_mathzone_typ()
+  end
+
+  return false
+end
+
+M.in_text = function()
+  return not M.in_mathzone()
+end
+
+M.in_item = function()
+  return M.in_env("itemize") or M.in_env("enumerate")
+end
+M.in_bib = function()
+  return M.in_env("thebibliography")
+end
+M.in_tikz = function()
+  return M.in_env("tikzpicture")
+end
+M.in_quantikz = function()
+  return M.in_env("quantikz")
+end
+M.in_algo = function()
+  return M.in_env("algorithmic")
+end
+
+M.in_matrix = function()
+  return M.in_env("matrix")
+    or M.in_env("pmatrix")
+    or M.in_env("bmatrix")
+    or M.in_env("Bmatrix")
+    or M.in_env("vmatrix")
+    or M.in_env("Vmatrix")
+    or M.in_env("smallmatrix")
+end
+
+-- M.clean = function()
+--   local current_dir = vim.fn.expand("%:p:h")
+--   local file_types = { "aux", "log", "out", "fls", "fdb_latexmk", "bcf", "run.xml", "toc", "DS_Store", "bak*", "dvi" }
+--   for _, file_type in ipairs(file_types) do
+--     local command = "rm " .. current_dir .. "/*." .. file_type
+--     vim.api.nvim_call_function("system", { command })
+--   end
+-- end
+--
+-- M.format = function()
+--   local current_file = vim.fn.expand("%:p")
+--   local latexindent = "latexindent -g /dev/null " .. current_file .. " -wd -l ~/Documents/Latex/latexindent.yaml"
+--   local build = "pdflatex " .. current_file
+--   vim.api.nvim_call_function("system", { build })
+--   vim.cmd("w")
+--   M.clean()
+--   vim.api.nvim_call_function("system", { latexindent })
+--   vim.cmd("e")
+--   vim.cmd("normal! zz")
+--   -- vim.cmd("TexlabForward")
+-- end
+--
+-- M.sympy_calc = function()
+--   local selected_text = vim.fn.getreg("v")
+--   print(selected_text)
+--   vim.api.nvim_out_write(selected_text)
+-- end
+
+return M
