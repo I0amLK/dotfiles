@@ -1,8 +1,15 @@
 return {
 
   {
-    "folke/tokyonight.nvim",
-    lazy = true,
-    opts = { style = "day" },
+    "loctvl842/monokai-pro.nvim",
+    lazy = false,
+    priority = 1000,
+    opts = {
+      filter = "pro",
+    },
+    config = function(_, opts)
+      require("monokai-pro").setup(opts)
+      vim.cmd.colorscheme("monokai-pro")
+    end,
   },
 }

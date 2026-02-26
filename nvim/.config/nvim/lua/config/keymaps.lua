@@ -210,17 +210,6 @@ map("n", "<leader>nc", function()
   end
 end, { desc = "Commit & push Obsidian vault" })
 
--- Git: 拉取最新 Obsidian 库
-map("n", "<leader>np", function()
-  local ft = vim.bo.filetype
-  if ft == "markdown" then
-    require("util.obsidian").vault_pull()
-  else
-    vim.notify("Not a markdown file!", vim.log.levels.ERROR)
-    return nil
-  end
-end, { desc = "Pull latest Obsidian vault" })
-
 -- =============================================================================
 -- 🔔 通知历史查看
 -- =============================================================================
@@ -272,5 +261,4 @@ del("n", "<leader>ft") -- 原为按文件类型搜索
 del("n", "<leader>fT") -- 原为按内容搜索（带预览）
 
 -- =============================================================================
--- ✅ 【重要补充】如果你希望用 <Space>e 打开左侧文件浏览器（Neo-tree）
---
+-- ✅ 【重要补充】

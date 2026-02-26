@@ -20,3 +20,8 @@ vim.opt.shiftwidth = indent -- Size of an indent
 if vim.g.neovide then
   require("config.neovide")
 end
+
+-- Auto wrap long lines and maintain indentation
+vim.opt.wrap = true
+vim.opt.linebreak = true
+vim.opt.breakindent = true

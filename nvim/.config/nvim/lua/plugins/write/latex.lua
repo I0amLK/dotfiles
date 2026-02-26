@@ -92,4 +92,15 @@ return {
       { "<leader>lP", "<cmd>TeXpresso %<cr>", desc = "TeXpresso" },
     },
   },
+  {
+    "neovim/nvim-lspconfig",
+    optional = true,
+    opts = {
+      servers = {
+        texlab = {
+          keys = {},
+        },
+      },
+    },
+  },
 }
