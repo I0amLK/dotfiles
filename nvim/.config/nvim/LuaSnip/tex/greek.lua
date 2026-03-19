@@ -5,12 +5,8 @@ local f = ls.function_node
 
 local tex = require("util.latex")
 
-local function ends_with(str, suffix)
-  return #str >= #suffix and str:sub(-#suffix) == suffix
-end
-
-local function prev_char(line_to_cursor, suffix_len)
-  local idx = #line_to_cursor - suffix_len
+local function prev_char(line_to_cursor, trigger_len)
+  local idx = #line_to_cursor - trigger_len
   if idx <= 0 then
     return ""
   end
@@ -50,6 +46,7 @@ local GREEK_LETTERS = {
   x = "\\xi",
   y = "\\psi",
   z = "\\zeta",
+
   A = "\\Alpha",
   B = "\\Beta",
   C = "\\Chi",
@@ -107,6 +104,7 @@ local FULL_NAMES = {
   "xi",
   "psi",
   "zeta",
+
   "Alpha",
   "Beta",
   "Chi",
@@ -131,6 +129,7 @@ local FULL_NAMES = {
   "Xi",
   "Psi",
   "Zeta",
+
   "ket",
   "bra",
   "perp",
@@ -145,49 +144,178 @@ local VARIANT_MAP = {
   kappa = "\\varkappa",
 }
 
+local GREEK_COMMAND_SET = {
+  alpha = true,
+  beta = true,
+  chi = true,
+  delta = true,
+  epsilon = true,
+  varepsilon = true,
+  phi = true,
+  varphi = true,
+  gamma = true,
+  eta = true,
+  iota = true,
+  kappa = true,
+  varkappa = true,
+  lambda = true,
+  mu = true,
+  nu = true,
+  omicron = true,
+  pi = true,
+  varpi = true,
+  theta = true,
+  vartheta = true,
+  rho = true,
+  sigma = true,
+  varsigma = true,
+  tau = true,
+  upsilon = true,
+  omega = true,
+  xi = true,
+  psi = true,
+  zeta = true,
+
+  Alpha = true,
+  Beta = true,
+  Chi = true,
+  Delta = true,
+  Epsilon = true,
+  Phi = true,
+  Gamma = true,
+  Eta = true,
+  Iota = true,
+  Kappa = true,
+  Lambda = true,
+  Mu = true,
+  Nu = true,
+  Omicron = true,
+  Pi = true,
+  Theta = true,
+  Rho = true,
+  Sigma = true,
+  Tau = true,
+  Upsilon = true,
+  Omega = true,
+  Xi = true,
+  Psi = true,
+  Zeta = true,
+}
+
+local function greek_numeric_condition(line_to_cursor, matched_trigger, captures)
+  if not tex.in_mathzone(line_to_cursor, matched_trigger, captures) then
+    return false
+  end
+  if not captures or not captures[1] then
+    return false
+  end
+  local cmd = captures[1]:sub(2) -- remove leading backslash
+  return GREEK_COMMAND_SET[cmd] == true
+end
+
 local snippets = {}
 
--- 3.1 Full names (alpha -> \alpha). Only triggers when you *didn't* already type a backslash.
+-- 1. Full names: alpha -> \alpha
 for _, name in ipairs(FULL_NAMES) do
   table.insert(
     snippets,
-    s({ trig = name, snippetType = "autosnippet", wordTrig = false }, t("\\" .. name), {
-      condition = function(line_to_cursor, ...)
-        if not tex.in_mathzone(...) then
-          return false
-        end
-        if ends_with(line_to_cursor, "\\\\" .. name) then
-          return false
-        end
-        return prev_char(line_to_cursor, #name) ~= "\\\\"
-      end,
-    })
+    s(
+      {
+        trig = name,
+        snippetType = "autosnippet",
+        wordTrig = true,
+      },
+      t("\\" .. name),
+      {
+        condition = function(line_to_cursor, ...)
+          return tex.in_mathzone(...) and prev_char(line_to_cursor, #name) ~= "\\"
+        end,
+      }
+    )
   )
 end
 
--- 3.2 Semicolon shortcuts (a; -> \alpha, ve; -> \varepsilon, ...)
+-- 2. Semicolon shortcuts: a; -> \alpha
 for key, value in pairs(GREEK_LETTERS) do
   table.insert(
     snippets,
-    s({ trig = key .. ";", snippetType = "autosnippet", wordTrig = false }, t(value), {
-      condition = function(line_to_cursor, ...)
-        if not tex.in_mathzone(...) then
-          return false
-        end
-        if not ends_with(line_to_cursor, key .. ";") then
-          return false
-        end
-        local pc = prev_char(line_to_cursor, #key + 1)
-        return not pc:match("%a")
-      end,
-    })
+    s(
+      {
+        trig = key .. ";",
+        snippetType = "autosnippet",
+        wordTrig = false,
+      },
+      t(value),
+      {
+        condition = function(line_to_cursor, ...)
+          if not tex.in_mathzone(...) then
+            return false
+          end
+          local pc = prev_char(line_to_cursor, #key + 1)
+          return pc == "" or not pc:match("[%a\\]")
+        end,
+      }
+    )
   )
 end
 
--- 3.3 Variant helper: \epsilonvar / \epsilon var -> \varepsilon (etc.)
+-- 3. Variant helpers
 for base, replacement in pairs(VARIANT_MAP) do
-  table.insert(snippets, s({ trig = "\\\\" .. base .. "var", snippetType = "autosnippet", wordTrig = false }, t(replacement), { condition = tex.in_mathzone }))
-  table.insert(snippets, s({ trig = "\\\\" .. base .. " var", snippetType = "autosnippet", wordTrig = false }, t(replacement), { condition = tex.in_mathzone }))
+  table.insert(
+    snippets,
+    s({
+      trig = "\\" .. base .. "var",
+      snippetType = "autosnippet",
+      wordTrig = false,
+    }, t(replacement), { condition = tex.in_mathzone })
+  )
+
+  table.insert(
+    snippets,
+    s({
+      trig = "\\" .. base .. " var",
+      snippetType = "autosnippet",
+      wordTrig = false,
+    }, t(replacement), { condition = tex.in_mathzone })
+  )
 end
+
+-- 4. \alpha1 -> \alpha_1
+table.insert(
+  snippets,
+  s(
+    {
+      trig = [[(\%a+)(%d)]],
+      regTrig = true,
+      trigEngine = "pattern",
+      wordTrig = false,
+      snippetType = "autosnippet",
+      priority = 200,
+    },
+    f(function(_, snip)
+      return snip.captures[1] .. "_" .. snip.captures[2]
+    end),
+    { condition = greek_numeric_condition }
+  )
+)
+
+-- 5. \alpha_12 -> \alpha_{12}
+table.insert(
+  snippets,
+  s(
+    {
+      trig = [[(\%a+)_(%d%d+)]],
+      regTrig = true,
+      trigEngine = "pattern",
+      wordTrig = false,
+      snippetType = "autosnippet",
+      priority = 210,
+    },
+    f(function(_, snip)
+      return snip.captures[1] .. "_{" .. snip.captures[2] .. "}"
+    end),
+    { condition = greek_numeric_condition }
+  )
+)
 
 return snippets

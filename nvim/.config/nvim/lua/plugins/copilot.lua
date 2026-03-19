@@ -11,9 +11,10 @@ return {
         auto_trigger = true,
         keymap = {
           -- 🔴 恢复 Tab 键接受建议（因为你 LuaSnip 用 fj，所以这里用 Tab 没问题）
-          accept = "<Tab>", 
+          accept = "<Tab>",
           next = "<M-]>",
           prev = "<M-[>",
+          dismiss = "<C-]>",
         },
       },
       panel = { enabled = false },
