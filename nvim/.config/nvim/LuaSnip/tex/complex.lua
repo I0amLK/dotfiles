@@ -75,7 +75,13 @@ return {
   ),
 
   s(
-    { trig = [[([A-Za-z])_(%d%d)]], regTrig = true, trigEngine = "pattern", snippetType = "autosnippet", priority = 100 },
+    {
+      trig = [[([A-Za-z])_(%d%d)]],
+      regTrig = true,
+      trigEngine = "pattern",
+      snippetType = "autosnippet",
+      priority = 100,
+    },
     f(function(_, snip)
       return snip.captures[1] .. "_{" .. snip.captures[2] .. "}"
     end),
@@ -111,46 +117,34 @@ return {
   ),
 
   -- Math-mode: power/subscript blocks
-  s(
-    {
-      trig = [[\%((math\|\\)\)\@<!pw]],
-      regTrig = true,
-      trigEngine = "vim",
-      snippetType = "autosnippet",
-    },
-    { t("^{"), i(1), t("}"), i(0) },
-    { condition = tex.in_mathzone }
-  ),
+  s({
+    trig = [[\%((math\|\\)\)\@<!pw]],
+    regTrig = true,
+    trigEngine = "vim",
+    snippetType = "autosnippet",
+  }, { t("^{"), i(1), t("}"), i(0) }, { condition = tex.in_mathzone }),
 
-  s(
-    {
-      trig = [[\%((math\|\\)\)\@<!sc]],
-      regTrig = true,
-      trigEngine = "vim",
-      snippetType = "autosnippet",
-    },
-    { t("_{"), i(1), t("}"), i(0) },
-    { condition = tex.in_mathzone }
-  ),
+  s({
+    trig = [[\%((math\|\\)\)\@<!sc]],
+    regTrig = true,
+    trigEngine = "vim",
+    snippetType = "autosnippet",
+  }, { t("_{"), i(1), t("}"), i(0) }, { condition = tex.in_mathzone }),
 
   -- Math-mode: smart fraction (captures numerator before / and wraps in \frac)
-  s(
-    {
-      trig = [[\%(^\|[^\\]\)\zs\(\%\(\d\+\|\d*[A-Za-z\\][A-Za-z]*\)\%\(\%([\^_]\)\%({\w\+}\|\w\)\|'\)*\)/]],
-      regTrig = true,
-      trigEngine = "vim",
-      snippetType = "autosnippet",
-      priority = 10,
-    },
-    {
-      f(function(_, snip)
-        return "\\frac{" .. snip.captures[1] .. "}{"
-      end),
-      i(1),
-      t("}"),
-    },
-    { condition = tex.in_mathzone }
-  ),
+  s({
+    trig = [[\%(^\|[^\\]\)\zs\(\%\(\d\+\|\d*[A-Za-z\\][A-Za-z]*\)\%\(\%([\^_]\)\%({\w\+}\|\w\)\|'\)*\)/]],
+    regTrig = true,
+    trigEngine = "vim",
+    snippetType = "autosnippet",
+    priority = 10,
+  }, {
+    f(function(_, snip)
+      return "\\frac{" .. snip.captures[1] .. "}{"
+    end),
+    i(1),
+    t("}"),
+  }, { condition = tex.in_mathzone }),
 
   -- Math-mode: prefix wrappers (xbar -> \overline{x}, etc.)
   s(
@@ -175,7 +169,7 @@ return {
   -- Math-mode: roman operators (Hom, End, Aut, etc.)
   s(
     {
-      trig = [[\(Hom\|End\|Aut\|Gal\|Spec\|Sch\|Proj\|GL\|SL\|PGL\|PSL\|Sp\|Tr\)]],
+      trig = [[\C\(Hom\|End\|Aut\|Gal\|Spec\|Sch\|Proj\|GL\|SL\|PGL\|PSL\|Sp\|Tr\)]],
       regTrig = true,
       trigEngine = "vim",
       snippetType = "autosnippet",

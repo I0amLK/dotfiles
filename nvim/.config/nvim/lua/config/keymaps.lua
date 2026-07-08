@@ -264,3 +264,7 @@ del("n", "<leader>fT") -- 原为按内容搜索（带预览）
 -- ✅ 【重要补充】
 
 vim.keymap.set("i", "kj", "<Esc>")
+
+vim.keymap.set("n", "<leader>r", "<cmd>lua Snacks.dashboard.open()<cr>", {
+  desc = "Open Dashboard",
+})
