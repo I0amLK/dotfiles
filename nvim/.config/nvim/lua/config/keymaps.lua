@@ -127,8 +127,7 @@ else
 end
 
 -- Ghostty forwards Cmd+S via the Kitty keyboard protocol; handle it in Neovim.
--- Skip synchronous LSP autoformat here because large LaTeX files can exceed
--- texlab's timeout and block the editor on save. Use <leader>cf to format.
+-- Skip synchronous autoformat here. Use <leader>cf (tex-fmt) to format.
 local function save_without_autoformat()
   local buf = vim.api.nvim_get_current_buf()
   local autoformat = vim.b[buf].autoformat

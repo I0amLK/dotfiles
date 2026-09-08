@@ -4,8 +4,8 @@
 
 vim.lsp.log.set_level(vim.log.levels.OFF)
 
--- Large LaTeX files can make texlab exceed its 3s format timeout and block
--- every write. Format explicitly with <leader>cf instead.
+-- Full-document formatting can block every write on large LaTeX files.
+-- Format explicitly with <leader>cf (tex-fmt) instead.
 vim.g.autoformat = false
 
 vim.opt.timeoutlen = 150
