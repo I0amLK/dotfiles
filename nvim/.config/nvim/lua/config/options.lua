@@ -3,6 +3,11 @@
 -- Add any additional options here
 
 vim.lsp.log.set_level(vim.log.levels.OFF)
+
+-- Large LaTeX files can make texlab exceed its 3s format timeout and block
+-- every write. Format explicitly with <leader>cf instead.
+vim.g.autoformat = false
+
 vim.opt.timeoutlen = 150
 vim.opt.spell = true
 vim.opt.spelllang = { "en", "cjk" }

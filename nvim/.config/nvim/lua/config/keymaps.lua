@@ -126,6 +126,22 @@ else
   map("n", "<leader>w", "<cmd>w<cr>", { desc = "Save file" })
 end
 
+-- Ghostty forwards Cmd+S via the Kitty keyboard protocol; handle it in Neovim.
+-- Skip synchronous LSP autoformat here because large LaTeX files can exceed
+-- texlab's timeout and block the editor on save. Use <leader>cf to format.
+local function save_without_autoformat()
+  local buf = vim.api.nvim_get_current_buf()
+  local autoformat = vim.b[buf].autoformat
+  vim.b[buf].autoformat = false
+  local ok, err = pcall(vim.cmd.write)
+  vim.b[buf].autoformat = autoformat
+  if not ok then
+    vim.notify(err, vim.log.levels.ERROR)
+  end
+end
+
+map({ "n", "i", "v" }, "<D-s>", save_without_autoformat, { desc = "Save file without autoformat (Cmd+S)" })
+
 -- 切换终端（依赖 toggleterm.nvim）
 map({ "n", "v", "t" }, "<leader>;", "<cmd>ToggleTerm<cr>", { desc = "Toggle floating terminal" })
 
