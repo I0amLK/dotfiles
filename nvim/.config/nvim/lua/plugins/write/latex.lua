@@ -61,19 +61,12 @@ return {
       vim.api.nvim_create_user_command("ConvertToDocx", ConvertTexToDocx, {})
       vim.keymap.set("n", "<localleader>ld", ConvertTexToDocx, { desc = "convert to docx file" })
 
-      -- Matrix mode: Tab inserts " & ", Enter inserts " \\\\" and newline
+      -- Matrix Tab is handled by blink.cmp after completion and Copilot.
+      -- Enter inserts " \\\\" and newline.
       local tex = require("util.latex")
       vim.api.nvim_create_autocmd("FileType", {
         pattern = { "tex", "latex" },
         callback = function()
-          vim.keymap.set("i", "<Tab>", function()
-            if tex.in_matrix() then
-              return " & "
-            else
-              return "<Tab>"
-            end
-          end, { buffer = true, expr = true, desc = "Matrix: insert &" })
-
           vim.keymap.set("i", "<CR>", function()
             if tex.in_matrix() then
               return " \\\\\r"

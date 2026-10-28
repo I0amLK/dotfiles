@@ -2,24 +2,28 @@ return {
   {
     "LazyVim/LazyVim",
     opts = {
-      colorscheme = "solarized8",
+      colorscheme = "kanagawa-wave",
     },
   },
 
   {
-    "lifepillar/vim-solarized8",
+    "rebelot/kanagawa.nvim",
     lazy = false,
     priority = 1000,
-    init = function()
-      vim.o.background = "light"
-    end,
+    opts = {
+      theme = "wave",
+      background = {
+        dark = "wave",
+        light = "lotus",
+      },
+    },
   },
 
   {
     "nvim-lualine/lualine.nvim",
     opts = function(_, opts)
       opts.options = opts.options or {}
-      opts.options.theme = "solarized_light"
+      opts.options.theme = "kanagawa"
 
       -- 关键：圆角外观在这里配
       opts.options.section_separators = { left = "", right = "" }

@@ -10,8 +10,8 @@ return {
         enabled = true, -- 🔴 强制开启 Ghost Text
         auto_trigger = true,
         keymap = {
-          -- 🔴 恢复 Tab 键接受建议（因为你 LuaSnip 用 fj，所以这里用 Tab 没问题）
-          accept = "<Tab>",
+          -- Tab is handled by blink.cmp: completion menu first, then Copilot.
+          accept = false,
           next = "<M-]>",
           prev = "<M-[>",
           dismiss = "<C-]>",

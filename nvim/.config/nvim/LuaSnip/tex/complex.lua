@@ -125,9 +125,10 @@ return {
   }, { t("^{"), i(1), t("}"), i(0) }, { condition = tex.in_mathzone }),
 
   s({
-    trig = [[\%((math\|\\)\)\@<!sc]],
+    trig = [[\%((math\|\\)\)\@<![sS]c]],
     regTrig = true,
     trigEngine = "vim",
+    wordTrig = false,
     snippetType = "autosnippet",
   }, { t("_{"), i(1), t("}"), i(0) }, { condition = tex.in_mathzone }),
 
